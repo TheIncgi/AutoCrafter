@@ -1,14 +1,14 @@
 [
 {
-  "modid": "examplemod",
-  "name": "Example Mod",
-  "description": "Example placeholder mod.",
+  "modid": "autocrafter",
+  "name": "Auto Crafter",
+  "description": "Automatic crafting without recipe conflict issues",
   "version": "${version}",
   "mcversion": "${mcversion}",
   "url": "",
   "updateUrl": "",
-  "authorList": ["ExampleDude"],
-  "credits": "The Forge and FML guys, for making this example",
+  "authorList": ["TheIncgi"],
+  "credits": "The Forge and FML guys, for making this possible.",
   "logoFile": "",
   "screenshots": [],
   "dependencies": []
