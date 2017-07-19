@@ -24,6 +24,8 @@ public class CommonProxy {
     }
 
     public void init(FMLInitializationEvent e) {
+    	BlockHandler.init();
+    	BlockHandler.reg();
     	BlockAutoCrafter.addRecipe();
     	NetworkRegistry.INSTANCE.registerGuiHandler(Core.instance, new GuiHandler());
     	
