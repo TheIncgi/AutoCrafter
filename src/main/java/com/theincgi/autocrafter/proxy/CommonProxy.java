@@ -7,17 +7,20 @@ import com.theincgi.autocrafter.blocks.BlockAutoCrafter;
 import com.theincgi.autocrafter.packets.PacketClientChanged;
 import com.theincgi.autocrafter.packets.PacketServerUpdated;
 
+import net.minecraft.block.Block;
+import net.minecraft.item.Item;
+import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.relauncher.Side;
 
 public class CommonProxy {
 	public void preInit(FMLPreInitializationEvent e) {
-		BlockHandler.init();
-		BlockHandler.reg();
+		
     }
 
     public void init(FMLInitializationEvent e) {
@@ -31,7 +34,6 @@ public class CommonProxy {
     	Core.network = NetworkRegistry.INSTANCE.newSimpleChannel(Core.MODID);
     	Core.network.registerMessage(clientHandler, PacketClientChanged.class, 0, Side.SERVER);
     	Core.network.registerMessage(serverHandler, PacketServerUpdated.class, 1, Side.CLIENT);
-    	//TODO Core.network.registerMessage(Core.packetHandler, PacketRecipeChanged.class, 0, Side.CLIENT);
     }
 
     public void postInit(FMLPostInitializationEvent e) {
