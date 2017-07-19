@@ -4,7 +4,7 @@ import com.theincgi.autocrafter.BlockHandler;
 import com.theincgi.autocrafter.Core;
 import com.theincgi.autocrafter.GuiHandler;
 import com.theincgi.autocrafter.blocks.BlockAutoCrafter;
-import com.theincgi.autocrafter.packets.PacketClientChange;
+import com.theincgi.autocrafter.packets.PacketClientChanged;
 import com.theincgi.autocrafter.packets.PacketServerUpdated;
 
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -24,12 +24,12 @@ public class CommonProxy {
     	BlockAutoCrafter.addRecipe();
     	NetworkRegistry.INSTANCE.registerGuiHandler(Core.instance, new GuiHandler());
     	
-    	PacketClientChange.Handler clientHandler = new PacketClientChange.Handler();
+    	PacketClientChanged.Handler clientHandler = new PacketClientChanged.Handler();
     	PacketServerUpdated.Handler serverHandler = new PacketServerUpdated.Handler();
     	
    	
     	Core.network = NetworkRegistry.INSTANCE.newSimpleChannel(Core.MODID);
-    	Core.network.registerMessage(clientHandler, PacketClientChange.class, 0, Side.SERVER);
+    	Core.network.registerMessage(clientHandler, PacketClientChanged.class, 0, Side.SERVER);
     	Core.network.registerMessage(serverHandler, PacketServerUpdated.class, 1, Side.CLIENT);
     	//TODO Core.network.registerMessage(Core.packetHandler, PacketRecipeChanged.class, 0, Side.CLIENT);
     }
@@ -44,6 +44,6 @@ public class CommonProxy {
     public boolean isServer(){
     	return this instanceof ServerProxy;
     }
-
+    //Send packet to server if client side was loaded
 	public void sendPacketServer(IMessage packetTargetChanged) {}
 }

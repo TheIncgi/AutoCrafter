@@ -19,13 +19,10 @@ import net.minecraftforge.oredict.ShapelessOreRecipe;
 public class Recipe {
 	ItemStack output;
 	public NonNullList<ItemOptions> items = NonNullList.withSize(9, ItemOptions.EMPTY);
-	//private IRecipe recipe;
 	
 	public void setRecipe(IRecipe iRecipe){
-		//this.recipe = iRecipe;
 		output = iRecipe.getRecipeOutput();
 		for(int i = 0; i<items.size();i++){items.set(i, ItemOptions.EMPTY);}
-		//System.out.println("Debug: Recipe type is "+iRecipe.getClass());
 		if(iRecipe instanceof ShapedRecipes){
 			ShapedRecipes sr = (ShapedRecipes) iRecipe;
 			for (int i = 0; i < sr.recipeItems.length; i++) {
@@ -78,17 +75,13 @@ public class Recipe {
 	
 	public ItemStack getDisplayItem(int slot){
 		ItemOptions opt = items.get(slot);
-		//System.out.println("DISPLAY ITEM "+opt.opts.size());
 		if(opt.opts.size()==0){return ItemStack.EMPTY;}
 		long mod = (System.currentTimeMillis()/500)%opt.opts.size();
 		ItemStack is = opt.opts.get((int) mod);
-		//if(slot==0)
-			//System.out.println(is.getItemDamage());
 		return new ItemStack(is.getItem(), 1, is.getItemDamage()==OreDictionary.WILDCARD_VALUE?(int)mod%Math.max(1,is.getMaxDamage()):is.getItemDamage());
 	}
 	public boolean matchesRecipe(int slot, ItemStack itemStack){
 		ItemOptions opt = items.get(slot);
-		//System.out.println("Checking "+slot+" for "+opt.opts.size());
 		if(opt.opts.size()==0 && itemStack.isEmpty()){return true;}
 		
 		for(ItemStack i : opt.opts){
@@ -100,34 +93,17 @@ public class Recipe {
 		return false;
 	}
 	
-//	private IRecipe findRecipe(){
-//		Recipe temp = new Recipe();
-//		for (IRecipe r : CraftingManager.getInstance().getRecipeList()) {
-//			temp.setRecipe(r);
-//			if(temp.equals(this)){
-//				return r;
-//			}
-//		}
-//		return null;
-//	}
-//	public IRecipe getIRecipe(){
-//		if(this.recipe!=null){return recipe;}
-//		return this.recipe=findRecipe();
-//	}
-	
 	public NBTTagList getNBT(){
 		NBTTagList list = new NBTTagList();
 		list.appendTag(getOutput().serializeNBT());
 		for(int i = 0; i<items.size(); i++){
 			NBTTagCompound slot = new NBTTagCompound();
-			//slot.setByte("Slot", (byte) (i&255));
 			slot.setTag("item", items.get(i).getNBT());
 			list.appendTag(slot);
 		}
 		return list;
 	}
 	public static Recipe fromNBT(NBTTagList tags){
-		//System.out.println("Realy read this: "+tags);
 		Recipe recipe = new Recipe();
 		recipe.output = new ItemStack(tags.getCompoundTagAt(0));
 		for(int i = 1; i<tags.tagCount(); i++){
@@ -190,7 +166,7 @@ public class Recipe {
 					}
 					if(!found){return false;}
 				}
-				return true;//never didnt find stuff, all good 100%
+				return true;
 			}
 			return false;
 		}
@@ -240,7 +216,7 @@ public class Recipe {
 	}
 	
 	
-	/**to in exclusive*/
+	/**to is exclusive*/
 	public NonNullList<ItemStack> getLeftovers(NonNullList<ItemStack> inv, int from, int to){
 		NonNullList<ItemStack> ret = NonNullList.withSize(to-from, ItemStack.EMPTY);
         for (int i = from; i < to; i++)

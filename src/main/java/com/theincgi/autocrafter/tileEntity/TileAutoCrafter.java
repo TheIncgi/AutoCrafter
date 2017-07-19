@@ -52,20 +52,14 @@ public class TileAutoCrafter extends TileEntity implements ITickable, ISidedInve
 	@Override
 	public void readFromNBT(NBTTagCompound compound) {
 		super.readFromNBT(compound);
-		//System.out.println(compound);
 		if(compound.hasKey("customName"))
 			customName = compound.getString("customName");
 		if(compound.hasKey("inventory"))
 			ItemStackHelper.loadAllItems(compound.getCompoundTag("inventory"), inventory);
 		if(compound.hasKey("recipe"))
 			recipe = Recipe.fromNBT(compound.getTagList("recipe", 10));
-		//System.out.println("Read REcipe: "+recipe.getNBT());
-		//System.out.println("DEBUG: "+ compound.getTagList("recipe", 10).getCompoundTagAt(0));
 		if(compound.hasKey("crafts"))
 			crafts = new ItemStack(compound.getCompoundTag("crafts"));
-
-		//System.out.println(recipe);
-		//System.out.println("BEFORE TAC " + this);
 	}
 
 
@@ -192,20 +186,9 @@ public class TileAutoCrafter extends TileEntity implements ITickable, ISidedInve
 	@Override
 	public boolean canInsertItem(int index, ItemStack itemStackIn, EnumFacing direction) {
 		//System.out.printf("canInsertItem: %d %s %s\n",index, itemStackIn.getItem().getRegistryName().toString(), isSlotAllowed(index, itemStackIn) && nextHasSameOrMore(index, itemStackIn));
-		return isSlotAllowed(index, itemStackIn) && nextHasSameOrMore(index, itemStackIn);
+		return isSlotAllowed(index, itemStackIn);
 	}
 
-	private boolean nextHasSameOrMore(int index, ItemStack itemStackIn) {
-//		if(index==8)return true;
-//		if(itemStackIn.getCount()==0)return true;
-//		//for(int i = 8; i>=index+1; i--){
-//		for(int i = index+1; i<9; i++){
-//			if(recipe.matchesRecipe(i, itemStackIn)){
-//				return getStackInSlot(i).getCount()>getStackInSlot(index).getCount(); 
-//			}
-//		}
-		return true;
-	}
 	@Override
 	public boolean canExtractItem(int index, ItemStack stack, EnumFacing direction) {
 		return index==OUTPUT_SLOT || (index<9&&!recipe.matchesRecipe(index, stack));
@@ -289,7 +272,7 @@ public class TileAutoCrafter extends TileEntity implements ITickable, ISidedInve
 		//return if powered by redstone
 		if(world.isBlockPowered(pos)||world.isBlockIndirectlyGettingPowered(pos)>0){return;}
 		
-		if(recipe.getOutput().isEmpty() /*|| getStackInSlot(TARGET_SLOT).isEmpty()*/){return;}
+		if(recipe.getOutput().isEmpty()){return;}
 		if(getStackInSlot(OUTPUT_SLOT).getCount()+recipe.getOutput().getCount()>recipe.getOutput().getMaxStackSize()){return;}
 		if(!Recipe.matches(getStackInSlot(OUTPUT_SLOT), recipe.getOutput()) && !getStackInSlot(OUTPUT_SLOT).isEmpty()){return;}
 
@@ -297,11 +280,8 @@ public class TileAutoCrafter extends TileEntity implements ITickable, ISidedInve
 
 		for(int i = 0; i<9; i++){
 			if(!recipe.matchesRecipe(i, inventory.get(i))){
-				//System.out.println("Check Slot "+i);
 				return;}
 		}
-		//IRecipe iRecipe = recipe.getIRecipe();
-		//if(iRecipe==null){System.out.println("Recipe was null, check ur .="); return;}
 		NonNullList<ItemStack> leftovers = recipe.getLeftovers(inventory, 0, 9); //9, exclusive
 		for(int i = 0; i<9; i++){
 			inventory.get(i).shrink(1);
@@ -313,12 +293,12 @@ public class TileAutoCrafter extends TileEntity implements ITickable, ISidedInve
 					setInventorySlotContents(i, leftovers.get(i));
 				}else{
 					InventoryHelper.spawnItemStack(world, pos.getX(), pos.getY(), pos.getZ(), leftovers.get(i)); //drop in world if no space
+					//This is incase something happens like a stack of 16 milk buckets finds its way into the inventory
 				}
 			}
 		}
 		if(getStackInSlot(OUTPUT_SLOT).isEmpty()){
 			setInventorySlotContents(OUTPUT_SLOT, recipe.getOutput());
-			//System.out.println("Crafted: "+recipe.getOutput());
 		}else{
 			getStackInSlot(OUTPUT_SLOT).grow(recipe.getOutput().getCount());
 		}

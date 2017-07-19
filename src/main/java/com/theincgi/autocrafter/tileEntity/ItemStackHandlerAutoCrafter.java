@@ -25,13 +25,10 @@ public class ItemStackHandlerAutoCrafter implements IItemHandler{
 
 	@Override
 	public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-		//System.out.println("Used Cape");
 		if(tac.canInsertItem(slot, stack, EnumFacing.UP)){
-			//System.out.println("Insertable");
 			int space = getSpaceFor(slot, stack);
 
 			if(simulate){
-				//System.out.println("Simulate used");
 				if(stack.getCount()<=space)
 					return ItemStack.EMPTY;
 				ItemStack m = stack.copy();
@@ -48,8 +45,6 @@ public class ItemStackHandlerAutoCrafter implements IItemHandler{
 				}
 				ItemStack temp = stack.copy();
 				temp.shrink(space);
-				//System.out.println("  Space>>"+space);
-				//System.out.println(Utils.itemStackToString(temp));
 				return temp;
 			}
 
@@ -82,7 +77,6 @@ public class ItemStackHandlerAutoCrafter implements IItemHandler{
 			if(getStackInSlot(indx).isEmpty())
 				return s.getMaxStackSize();
 		}
-		//System.out.printf(indx+" Doesnt match "+Utils.itemStackToString(s)+"\n");
 		return 0;
 	}
 

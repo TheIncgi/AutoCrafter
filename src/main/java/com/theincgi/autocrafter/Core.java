@@ -25,7 +25,6 @@ public class Core {
 	
 	public static BlockAutoCrafter blockAutoCrafter;
 	public static ItemBlock itemAutoCrafter;
-	//public static Handler packetHandler;
 	public static SimpleNetworkWrapper network;
 	
 	@EventHandler

@@ -12,22 +12,22 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class PacketClientChange extends PacketTileChanged{
+public class PacketClientChanged extends PacketTileChanged{
 
-	public PacketClientChange() {
+	public PacketClientChanged() {
 		super();
 	}
 
-	public PacketClientChange(BlockPos p, NBTTagCompound nbt) {
+	public PacketClientChanged(BlockPos p, NBTTagCompound nbt) {
 		super(p, nbt);
 	}
 
 	
 	/**This happens on server side*/
-	public static class Handler implements IMessageHandler<PacketClientChange, PacketTileChanged>{
+	public static class Handler implements IMessageHandler<PacketClientChanged, PacketTileChanged>{
 		@Override
-		public PacketTileChanged onMessage(PacketClientChange message, MessageContext ctx) {
-			final PacketClientChange fmsg = message;
+		public PacketTileChanged onMessage(PacketClientChanged message, MessageContext ctx) {
+			final PacketClientChanged fmsg = message;
 			final MessageContext fctx = ctx;
 			ctx.getServerHandler().playerEntity.getServerWorld().addScheduledTask(new Runnable() {
 				@Override
@@ -41,11 +41,10 @@ public class PacketClientChange extends PacketTileChanged{
 						}else if(how.hasKey("prev")){
 							tac.prevRecipe();
 						}else if(how.hasKey("item")){
-							//System.out.println("Updating craft target: ");
-							//System.out.println(how.getCompoundTag("item"));
 							tac.updateRecipes(new ItemStack(how.getCompoundTag("item")), 0);
 						}else{
-							//????
+							//this shouldn't occur
+							System.err.println("Unhandled case in PacketClientChanged");
 						}
 						response.setTag("recipe", tac.getRecipe().getNBT());
 						response.setTag("targetSlot", tac.getCrafts().serializeNBT());
@@ -69,31 +68,31 @@ public class PacketClientChange extends PacketTileChanged{
 
 	}
 
-	public static PacketClientChange nextRecipe(BlockPos pos) {
+	public static PacketClientChanged nextRecipe(BlockPos pos) {
 		NBTTagCompound tag = new NBTTagCompound();
 		NBTTagCompound chng =new NBTTagCompound();
 		tag.setTag("targetChanged", chng);
 		chng.setBoolean("next", true);
-		return new PacketClientChange(pos, tag);
+		return new PacketClientChanged(pos, tag);
 	}
-	public static PacketClientChange prevRecipe(BlockPos pos) {
+	public static PacketClientChanged prevRecipe(BlockPos pos) {
 		NBTTagCompound tag = new NBTTagCompound();
 		NBTTagCompound chng =new NBTTagCompound();
 		tag.setTag("targetChanged", chng);
 		chng.setBoolean("prev", true);
-		return new PacketClientChange(pos, tag);
+		return new PacketClientChanged(pos, tag);
 	}
-	public static PacketClientChange requestAll(BlockPos pos) {
+	public static PacketClientChanged requestAll(BlockPos pos) {
 		NBTTagCompound tag = new NBTTagCompound();
 		tag.setBoolean("getAll", true);
-		return new PacketClientChange(pos, tag);
+		return new PacketClientChanged(pos, tag);
 	}
 
 	public static IMessage targetChanged(BlockPos pos, ItemStack heldItem) {
 		NBTTagCompound tag = new NBTTagCompound(), tag2;
 		tag.setTag("targetChanged", tag2=new NBTTagCompound());
 		tag2.setTag("item", heldItem.serializeNBT());
-		return new PacketClientChange(pos, tag);
+		return new PacketClientChanged(pos, tag);
 	}
 
 }

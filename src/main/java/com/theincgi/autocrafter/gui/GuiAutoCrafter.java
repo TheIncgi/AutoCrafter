@@ -6,7 +6,7 @@ import org.lwjgl.input.Keyboard;
 
 import com.theincgi.autocrafter.Core;
 import com.theincgi.autocrafter.container.ContainerAutoCrafter;
-import com.theincgi.autocrafter.packets.PacketClientChange;
+import com.theincgi.autocrafter.packets.PacketClientChanged;
 import com.theincgi.autocrafter.tileEntity.TileAutoCrafter;
 
 import net.minecraft.client.Minecraft;
@@ -43,8 +43,6 @@ public class GuiAutoCrafter extends GuiContainer{
 		this.playerInv = playerInv;
 		this.tileAutoCrafter = te;
 		container = (ContainerAutoCrafter) super.inventorySlots;
-		//System.out.println("Gui Created:");
-		//System.out.println(te.getRecipe());
 	}
 	@Override
 	public boolean doesGuiPauseGame() {
@@ -74,8 +72,6 @@ public class GuiAutoCrafter extends GuiContainer{
 		for(int i = 0; i<tileAutoCrafter.getRecipe().items.size(); i++){
 			Slot s = container.getSlot(i);
 			ItemStack req = tileAutoCrafter.getRecipe().getDisplayItem(i);
-			//ItemRenderer ir = Minecraft.getMinecraft().getItemRenderer();
-			//this.itemRender.renderItemIntoGUI(req, s.xPos+x , s.yPos+y);
 			
 			RenderHelper.disableStandardItemLighting();
 			RenderHelper.enableGUIStandardItemLighting();
@@ -83,13 +79,10 @@ public class GuiAutoCrafter extends GuiContainer{
 			GlStateManager.enableAlpha();
 			GlStateManager.enableBlend();
 			GlStateManager.disableDepth();
-			//GlStateManager.blendFunc(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA);
 			
-			//RenderHelper.enableGUIStandardItemLighting();
 			RenderHelper.enableGUIStandardItemLighting();
 			drawRect(s.xPos+x, s.yPos+y, s.xPos+x+16, s.yPos+y+16, req.isEmpty()?0xf0484848:0x708b8b8b);
 			GlStateManager.enableDepth();
-			//drawItemStack(req,s.xPos + x ,s.yPos + y,null);
 		}
 		ItemStack target = tileAutoCrafter.getCrafts();
 		Slot slot = container.targetSlot;
@@ -98,7 +91,6 @@ public class GuiAutoCrafter extends GuiContainer{
 		GlStateManager.color(1f, 1f, 1f, 1f);
 		this.itemRender.renderItemAndEffectIntoGUI(target, x+slot.xPos, y+slot.yPos);
 		GlStateManager.enableDepth();
-		//todo draw recipe
 	}
 
 	@Override
@@ -143,20 +135,16 @@ public class GuiAutoCrafter extends GuiContainer{
 		
 		int playerDim = Minecraft.getMinecraft().player.dimension;
 		if(prev.isInBounds(mouseX-x, mouseY-y)){
-			PacketClientChange packet = PacketClientChange.nextRecipe(tileAutoCrafter.getPos());
+			PacketClientChanged packet = PacketClientChanged.nextRecipe(tileAutoCrafter.getPos());
 			Core.network.sendToServer(packet);
-			//Core.network.sendToAllAround(prc, new TargetPoint(playerDim, bx, by, bz, 8));
-			//tileAutoCrafter.prevRecipe();
 		}else if(next.isInBounds(mouseX-x, mouseY-y)){
-			PacketClientChange packet = PacketClientChange.prevRecipe(tileAutoCrafter.getPos());
+			PacketClientChanged packet = PacketClientChanged.prevRecipe(tileAutoCrafter.getPos());
 			Core.network.sendToServer(packet);
-			//tileAutoCrafter.nextRecipe();
 		}else if(container.targetSlot.equals(getSlotUnderMouse())){
-			//System.out.println("Plz set recipe");
-			Core.proxy.sendPacketServer(PacketClientChange.targetChanged(tileAutoCrafter.getPos(), Minecraft.getMinecraft().player.inventory.getItemStack()));
+			Core.proxy.sendPacketServer(PacketClientChanged.targetChanged(tileAutoCrafter.getPos(), Minecraft.getMinecraft().player.inventory.getItemStack()));
 		}
 		if(Keyboard.isKeyDown(Keyboard.KEY_LSHIFT))
-			System.out.println(tileAutoCrafter.getRecipe()); //BOOKMARK WHY DOES IT CHANGE? todo setter for recipe, must be closely watched
+			System.out.println(tileAutoCrafter.getRecipe()); 
 	}
 
 	

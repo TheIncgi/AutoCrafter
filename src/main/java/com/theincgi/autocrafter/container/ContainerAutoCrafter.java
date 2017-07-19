@@ -1,7 +1,7 @@
 package com.theincgi.autocrafter.container;
 
 import com.theincgi.autocrafter.Core;
-import com.theincgi.autocrafter.packets.PacketClientChange;
+import com.theincgi.autocrafter.packets.PacketClientChanged;
 import com.theincgi.autocrafter.tileEntity.TileAutoCrafter;
 
 import net.minecraft.entity.player.EntityPlayer;
@@ -45,9 +45,6 @@ public class ContainerAutoCrafter extends Container {
 			@Override
 			public void onSlotChanged() {
 				super.onSlotChanged();
-//				if(Core.proxy.isClient()){
-//					Core.proxy.sendPacketServer(PacketClientChange.targetChanged(tileAutoCrafter.getPos()));
-//				}
 			}
 			@Override
 				public boolean canTakeStack(EntityPlayer playerIn) {
@@ -103,7 +100,6 @@ public class ContainerAutoCrafter extends Container {
 
 	@Override
 	public ItemStack transferStackInSlot(EntityPlayer playerIn, int index) {
-		//System.out.println("TransferStackInSlot: "+index);
 		ItemStack previous = ItemStack.EMPTY;
 		Slot slot = (Slot) this.inventorySlots.get(index);
 		Slots catagory = Slots.getCatagory(index);
@@ -112,12 +108,11 @@ public class ContainerAutoCrafter extends Container {
 			ItemStack current = slot.getStack();
 			previous = current.copy();
 
-			// [...] Custom behaviour
-			if(catagory!=null){
+ 			if(catagory!=null){
 				switch (catagory) {
 				case CRAFTING:
 				case OUTPUT:
-				case TARGET:
+				//case TARGET: target doesnt hold anything anymore
 					if(!mergeItemStack(current, Slots.PLAYERINV.getStart(), Slots.PLAYERINV.getEnd()+1, false)) return ItemStack.EMPTY;
 					if(!mergeItemStack(current, Slots.HOTBAR.getStart(), Slots.HOTBAR.getEnd()+1, false)) return ItemStack.EMPTY;
 					break;
@@ -127,47 +122,21 @@ public class ContainerAutoCrafter extends Container {
 						if(!mergeItemStack(current, Slots.TARGET.getStart(), Slots.TARGET.getEnd()+1, false)) return ItemStack.EMPTY;
 					}else{
 						if(!mergeItemStack(current, Slots.CRAFTING.getStart(), Slots.CRAFTING.getEnd()+1, false)) return ItemStack.EMPTY;
-						moveToCrafting(playerIn.inventory, current);
 					}
 				default:
 					break;
 				}
 			}
-
-
 			if (current.getCount() <= 0)
 				slot.putStack(ItemStack.EMPTY);
-
 
 			if (current.getCount() == previous.getCount())//amount in the slot didn't change
 				return ItemStack.EMPTY;
 
 			slot.onTake(playerIn, current);
 		}
-		return previous;//previous;
+		return previous;
 	}
-
-
-
-	private void moveToCrafting(InventoryPlayer inventory, ItemStack current) {
-		// TODO Auto-generated method stub
-
-	}
-
-
-
-	private void moveToTarget(InventoryPlayer inventory, ItemStack current) {
-		// TODO Auto-generated method stub
-
-	}
-
-
-	/**returns whatever should happen to containerStack, just set it to the return value plz*/
-	private ItemStack moveToInv(InventoryPlayer inventory, ItemStack containerStack) {
-		return moveToCatagory(Slots.PLAYERINV, inventory, containerStack);
-
-	}
-
 
 	private ItemStack moveToCatagory(Slots catagory, InventoryPlayer inventory, ItemStack containerStack){
 		for(int i = catagory.getStart(); i<=catagory.getEnd(); i++){

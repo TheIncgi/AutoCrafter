@@ -36,10 +36,8 @@ public class PacketServerUpdated extends PacketTileChanged {
 						return;
 					}
 					if(message.nbt.hasKey("targetSlot")){
-						//System.out.println("Server told us to update target slot!");
 						ItemStack newTarget = new ItemStack(message.nbt.getCompoundTag("targetSlot"));
-						//System.out.printf("Server: <%s> Client: <%s>", Utils.itemStackToString(newTarget), Utils.itemStackToString(ourTile.getCrafts()));
-						if(!Recipe.matches(ourTile.getCrafts(), newTarget)){//System.out.println("Target is new");
+						if(!Recipe.matches(ourTile.getCrafts(), newTarget)){//target is new
 							ourTile.setCrafts(newTarget);
 						}
 					}

@@ -2,7 +2,7 @@ package com.theincgi.autocrafter.blocks;
 
 import com.theincgi.autocrafter.Core;
 import com.theincgi.autocrafter.GuiHandler;
-import com.theincgi.autocrafter.packets.PacketClientChange;
+import com.theincgi.autocrafter.packets.PacketClientChanged;
 import com.theincgi.autocrafter.tileEntity.TileAutoCrafter;
 
 import net.minecraft.block.BlockContainer;
@@ -46,8 +46,6 @@ public class BlockAutoCrafter extends BlockContainer implements ITileEntityProvi
 				'C', Blocks.CRAFTING_TABLE,
 				'R', Items.REDSTONE
 				);
-		//System.out.println("\n**********\nRECIPE ADDED\n****************");
-		//System.out.println(getValid(new ItemStack(Core.crafter).getItem()));
 	}
 	
 	@Override
@@ -90,7 +88,7 @@ public class BlockAutoCrafter extends BlockContainer implements ITileEntityProvi
 			
 			playerIn.openGui(Core.instance, GuiHandler.AUTOCRAFTER_GUI	, worldIn, pos.getX(), pos.getY(), pos.getZ());
 		}else{
-			Core.network.sendToServer(PacketClientChange.requestAll(pos));
+			Core.network.sendToServer(PacketClientChanged.requestAll(pos));
 		}
 		return true;
 	}
