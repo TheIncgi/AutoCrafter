@@ -20,12 +20,12 @@ import net.minecraftforge.fml.relauncher.Side;
 
 public class CommonProxy {
 	public void preInit(FMLPreInitializationEvent e) {
-		
+		BlockHandler.init();
+    	BlockHandler.reg();
     }
 
     public void init(FMLInitializationEvent e) {
-    	BlockHandler.init();
-    	BlockHandler.reg();
+    	
     	BlockAutoCrafter.addRecipe();
     	NetworkRegistry.INSTANCE.registerGuiHandler(Core.instance, new GuiHandler());
     	
