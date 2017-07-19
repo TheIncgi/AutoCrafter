@@ -67,7 +67,7 @@ public class BlockAutoCrafter extends BlockContainer implements ITileEntityProvi
 		super.onBlockHarvested(worldIn, pos, state, player);
 		
 		TileAutoCrafter tac =  (TileAutoCrafter) worldIn.getTileEntity(pos);
-		if(!worldIn.isRemote && !Core.proxy.isClient()){
+		if(!worldIn.isRemote){
 			//dropBlockAsItem(worldIn, pos, state, 0); //Handled by server
 			InventoryHelper.dropInventoryItems(worldIn, pos, tac);
 			System.out.println("Droped item");
