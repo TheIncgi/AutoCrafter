@@ -63,6 +63,7 @@ public class Recipe {
 			}
 		}else{
 			Utils.log("It seems "+iRecipe.getClass().toGenericString() + " isn't a supported recipe type.");
+			output.setCount(0);
 		}
 		
 	}

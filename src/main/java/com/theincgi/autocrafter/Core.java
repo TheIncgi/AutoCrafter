@@ -17,7 +17,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 public class Core {
 	public static final String
 		MODID = "autocrafter",
-		VERSION = "1.6";
+		VERSION = "1.7";
 	@Instance
 	public static Core instance;
 	@SidedProxy(clientSide = "com.theincgi.autocrafter.proxy.ClientProxy", serverSide = "com.theincgi.autocrafter.proxy.ServerProxy")

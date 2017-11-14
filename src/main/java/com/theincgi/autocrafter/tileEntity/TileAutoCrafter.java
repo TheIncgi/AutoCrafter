@@ -273,9 +273,10 @@ public class TileAutoCrafter extends TileEntity implements ITickable, ISidedInve
 		if(world.isBlockPowered(pos)||world.isBlockIndirectlyGettingPowered(pos)>0){return;}
 		
 		if(recipe.getOutput().isEmpty()){return;}
+		if(recipe.getOutput().getCount()<=0) return;
 		if(getStackInSlot(OUTPUT_SLOT).getCount()+recipe.getOutput().getCount()>recipe.getOutput().getMaxStackSize()){return;}
 		if(!Recipe.matches(getStackInSlot(OUTPUT_SLOT), recipe.getOutput()) && !getStackInSlot(OUTPUT_SLOT).isEmpty()){return;}
-
+		
 		distibuteItems();
 
 		for(int i = 0; i<9; i++){
