@@ -1,3 +1,14 @@
+AutoCrafter info:
+This repository: MC Version 1.11.2
+
+Other Versions
+  - 1.12   https://github.com/TheIncgi/AutoCrafter-1.12
+  - 1.12.1 https://github.com/TheIncgi/Auto-Crafter-1.12.1
+  - 1.12.2 https://github.com/TheIncgi/AutoCrafter-1.12.2
+
+
+
+Forge README:
 -------------------------------------------
 Source installation information for modders
 -------------------------------------------
