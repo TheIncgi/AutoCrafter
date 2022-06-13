@@ -28,6 +28,10 @@ import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
+//special thanks for the tutorials
+//https://www.youtube.com/c/TKaupenjoe/videos
+//very helpful in updating
+
 @Mod(AutoCrafterMod.MODID)
 public class AutoCrafterMod {
 	public static final String
