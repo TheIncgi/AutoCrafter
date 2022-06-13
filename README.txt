@@ -6,6 +6,13 @@ Other Versions
   - 1.12.1 https://github.com/TheIncgi/Auto-Crafter-1.12.1
   - 1.12.2 https://github.com/TheIncgi/AutoCrafter-1.12.2
 
+# TODO
+ - [ ] set recipe while holding more than one item
+ - [ ] extra output items like cake bucket (currently disapear)
+ - [ ] shapeless
+ - [ ] forge ore shaped/shapless
+ - [ ] Data persistance
+ - [ ] withdraw ingrediants without breaking
 
 
 Forge README:

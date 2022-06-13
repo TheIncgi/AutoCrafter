@@ -2,6 +2,7 @@ package com.theincgi.autocrafter.network.packets;
 
 import java.util.function.Supplier;
 
+import com.theincgi.autocrafter.network.ModNetworkChannels;
 import com.theincgi.autocrafter.tileEntity.AutoCrafterTile;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -10,6 +11,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 public class TargetCycledPacket {
@@ -51,6 +53,9 @@ public class TargetCycledPacket {
 						eTile.nextRecipe();
 					else if(message.cycleDir.equals(CycleDir.PREV))
 						eTile.prevRecipe();
+					NotifyPlayerTargetChangedPacket update = new NotifyPlayerTargetChangedPacket(eTile.getCrafts(), eTile.getCurrentRecipeIndex(), blockPos);
+					ModNetworkChannels.CHANNEL.sendTo(update, player.connection.netManager, NetworkDirection.PLAY_TO_CLIENT);
+					//TODO broadcast?
 				}
 			}
 			

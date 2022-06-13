@@ -9,6 +9,8 @@ import org.lwjgl.glfw.GLFW;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.GlStateManager.DestFactor;
+import com.mojang.blaze3d.platform.GlStateManager.SourceFactor;
 import com.theincgi.autocrafter.AutoCrafterMod;
 import com.theincgi.autocrafter.Utils;
 import com.theincgi.autocrafter.container.AutoCrafterContainer;
@@ -68,6 +70,21 @@ public class AutoCrafterScreen extends ContainerScreen<AutoCrafterContainer>{
 		buffer.pos(x+wid, y, 0).tex(uMax, vMin).endVertex();
 		Tessellator.getInstance().draw();
 	}
+	public void drawRect(int x, int y, int wid, int hei, int color){
+		
+//		com.mojang.blaze3d.platform.GlStateManager.enableAlpha();
+		float r = ((color>>16)&0xFF) / 255f;
+		float g = ((color>>8)&0xFF)  /255f;
+		float b = (color & 0xFF)     /255f;
+		float a = ((color>>24)&0xFF) /255f;
+		BufferBuilder buffer = Tessellator.getInstance().getBuffer();
+		buffer.begin(7, DefaultVertexFormats.POSITION_COLOR);
+		buffer.pos(x, y, 0).color(r, g, b, a).endVertex();
+		buffer.pos(x, y+hei, 0).color(r, g, b, a).endVertex();
+		buffer.pos(x+wid, y+hei, 0).color(r, g, b, a).endVertex();
+		buffer.pos(x+wid, y, 0).color(r, g, b, a).endVertex();
+		Tessellator.getInstance().draw();
+	}
 
 	
 	@Override
@@ -77,6 +94,8 @@ public class AutoCrafterScreen extends ContainerScreen<AutoCrafterContainer>{
 		this.renderHoveredTooltip(matrixStack, mouseX, mouseY);
 		
 	}
+	
+	
 	
 //	@Override
 //	protected void drawGuiContainerForegroundLayer(MatrixStack ms, int mouseX, int mosueY) {
@@ -162,22 +181,23 @@ public class AutoCrafterScreen extends ContainerScreen<AutoCrafterContainer>{
 //			RenderHelper.setupForFlatItems();
 			this.itemRenderer.renderItemAndEffectIntoGUI(req, s.xPos + x, s.yPos + y);  //ItemAndEffectIntoGUI(req, s.x + x, s.y + y);
 //			GlStateManager.enableAlpha();
-			GlStateManager.enableBlend();
-			GlStateManager.disableDepthTest();
+//			GlStateManager.enableBlend();
+//			GlStateManager.disableDepthTest();
 			
 			RenderHelper.enableStandardItemLighting();
-			
-			//TODO drawRect(s.xPos+x, s.yPos+y, s.xPos+x+16, s.yPos+y+16, req.isEmpty()?0xf0484848:0x708b8b8b);
+			GlStateManager.blendFuncSeparate(SourceFactor.ONE_MINUS_SRC_COLOR.param, SourceFactor.DST_COLOR.param, DestFactor.ONE_MINUS_SRC_ALPHA.param, DestFactor.DST_ALPHA.param);
+			if( container.getTileEntity().getItemStackHandler().getStackInSlot(i).isEmpty() )
+				drawRect(s.xPos+x, s.yPos+y, 16, 16, req.isEmpty()?0xf0484848:0x708b8b8b);
 			
 //			GlStateManager.enableDepth();
 		}
 		ItemStack target = container.getTileEntity().getCrafts();
 		Slot slot = container.targetSlot;
 		//if((System.currentTimeMillis()/500)%2==0) //debug blink
-		GlStateManager.disableDepthTest();
-		GlStateManager.color4f(1f, 1f, 1f, 1f);
+//		GlStateManager.disableDepthTest();
+//		GlStateManager.color4f(1f, 1f, 1f, 1f);
 		this.itemRenderer.renderItemAndEffectIntoGUI(target, x+slot.xPos, y+slot.yPos);
-		GlStateManager.enableDepthTest();
+//		GlStateManager.enableDepthTest();
 	}
 
 	

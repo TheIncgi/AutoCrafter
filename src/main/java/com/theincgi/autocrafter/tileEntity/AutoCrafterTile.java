@@ -52,6 +52,7 @@ public class AutoCrafterTile extends TileEntity implements ITickableTileEntity, 
 		return true;
 	}
 	
+	
 	@Override
 	public <T> LazyOptional<T> getCapability(Capability<T> capability, Direction facing) {
 		if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
@@ -63,6 +64,7 @@ public class AutoCrafterTile extends TileEntity implements ITickableTileEntity, 
 	
 	@Override
 	public CompoundNBT write(CompoundNBT compound) {
+		compound = super.write(compound);
 		if(customName!=null)
 			compound.putString("customName", customName);
 		
@@ -72,6 +74,7 @@ public class AutoCrafterTile extends TileEntity implements ITickableTileEntity, 
 		compound.put("crafts", crafts.serializeNBT());
 		return compound;
 	}
+	
 
 	@Override
 	public void read(BlockState state, CompoundNBT nbt) {
@@ -205,6 +208,7 @@ public class AutoCrafterTile extends TileEntity implements ITickableTileEntity, 
 	}
 	public void setRecipe(ListNBT recipeTag){
 		recipe = Recipe.fromNBT(recipeTag);
+		markDirty();
 	}
 	public void updateRecipes(ItemStack crafts, int index) {
 		this.crafts = crafts;
@@ -282,9 +286,9 @@ public class AutoCrafterTile extends TileEntity implements ITickableTileEntity, 
 			}
 		}
 		if(getStackInSlot(OUTPUT_SLOT).isEmpty()){
-			setInventorySlotContents(OUTPUT_SLOT, recipe.getOutput());
+			ishac.setStackInSlot(OUTPUT_SLOT, recipe.getOutput());
 		}else{
-			getStackInSlot(OUTPUT_SLOT).grow(recipe.getOutput().getCount());
+			ishac.getStackInSlot(OUTPUT_SLOT).grow(recipe.getOutput().getCount());
 		}
 		markDirty();
 	}
@@ -297,7 +301,7 @@ public class AutoCrafterTile extends TileEntity implements ITickableTileEntity, 
 			if(nextMatch<0)continue;
 			if(getStackInSlot(nextMatch).isEmpty()){
 				if(current.getCount()>=2){
-					setInventorySlotContents(nextMatch, current.split(1));
+					ishac.setStackInSlot(nextMatch, current.split(1));
 				}
 			}else{
 				if(current.getCount()>getStackInSlot(nextMatch).getCount()){
@@ -325,16 +329,23 @@ public class AutoCrafterTile extends TileEntity implements ITickableTileEntity, 
 
 	public void setCurrentRecipeIndex(int integer) {
 		currentRecipeIndex = integer;
+		//TODO save recipe options list as nbt?
+		markDirty();
 	}
 
 	/**for rendering*/
 	public void setCrafts(ItemStack itemStack) {
 		this.crafts = itemStack;
+		markDirty();
 	}
 
 	@Override
 	public int getSizeInventory() {
 		return 11;
+	}
+
+	public ItemStackHandlerAutoCrafter getItemStackHandler() {
+		return ishac;
 	}
 
 

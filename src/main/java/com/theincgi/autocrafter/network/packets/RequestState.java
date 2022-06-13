@@ -2,12 +2,12 @@ package com.theincgi.autocrafter.network.packets;
 
 import java.util.function.Supplier;
 
-import com.theincgi.autocrafter.Utils;
 import com.theincgi.autocrafter.network.ModNetworkChannels;
 import com.theincgi.autocrafter.tileEntity.AutoCrafterTile;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -15,13 +15,11 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.NetworkEvent;
 
-public class TargetChangedPacket {
+public class RequestState {
 	
-	public ItemStack targetItem;
 	public BlockPos blockPos;
 
-	public TargetChangedPacket( ItemStack targetItem, BlockPos blockPos ) {
-		this.targetItem = targetItem;
+	public RequestState( BlockPos blockPos ) {
 		this.blockPos = blockPos;
 	}
 	
@@ -29,16 +27,15 @@ public class TargetChangedPacket {
 //		encode(this, buffer);
 //	}
 	
-	public static void encode(TargetChangedPacket message, PacketBuffer buffer) {
-		buffer.writeItemStack( message.targetItem );
+	public static void encode(RequestState message, PacketBuffer buffer) {
 		buffer.writeBlockPos( message.blockPos );
 	}
 	
-	public static TargetChangedPacket decode(PacketBuffer buffer) {
-		return new TargetChangedPacket( buffer.readItemStack(), buffer.readBlockPos() );
+	public static RequestState decode(PacketBuffer buffer) {
+		return new RequestState( buffer.readBlockPos() );
 	}
 	
-	public static void handle( final TargetChangedPacket message, final Supplier<NetworkEvent.Context> context ) {
+	public static void handle( final RequestState message, final Supplier<NetworkEvent.Context> context ) {
 		NetworkEvent.Context ctx = context.get();
 		ctx.enqueueWork(()->{
 			ServerPlayerEntity player = ctx.getSender();
@@ -49,8 +46,9 @@ public class TargetChangedPacket {
 			if( e != null ) {
 				if( e instanceof AutoCrafterTile ) {
 					AutoCrafterTile eTile = (AutoCrafterTile) e;
-					eTile.updateRecipes(message.targetItem, 0);
-					NotifyPlayerTargetChangedPacket update = new NotifyPlayerTargetChangedPacket(message.targetItem, 0, blockPos);
+					CompoundNBT nbt = new CompoundNBT();
+					nbt = eTile.write(nbt);
+					NotifyPlayerTileEntity update = new NotifyPlayerTileEntity(nbt, blockPos);
 					ModNetworkChannels.CHANNEL.sendTo(update, player.connection.netManager, NetworkDirection.PLAY_TO_CLIENT);
 					//TODO broadcast?
 				}

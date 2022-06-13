@@ -1,10 +1,13 @@
 package com.theincgi.autocrafter.block;
 
 import com.theincgi.autocrafter.container.AutoCrafterContainer;
+import com.theincgi.autocrafter.network.ModNetworkChannels;
+import com.theincgi.autocrafter.network.packets.RequestState;
 import com.theincgi.autocrafter.tileEntity.AutoCrafterTile;
 import com.theincgi.autocrafter.tileEntity.ModTileEntities;
 
 import net.minecraft.block.AbstractBlock;
+import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ContainerBlock;
 import net.minecraft.block.material.Material;
@@ -42,6 +45,11 @@ public class BlockAutoCrafter extends ContainerBlock{
 	}
 	
 	@Override
+	public BlockRenderType getRenderType(BlockState state) {
+		return BlockRenderType.MODEL;
+	}
+	
+	@Override
 	public boolean hasTileEntity(BlockState state) {
 		return true;
 	}
@@ -63,7 +71,7 @@ public class BlockAutoCrafter extends ContainerBlock{
 			TileEntity entity = worldIn.getTileEntity(pos);
 			if(entity instanceof AutoCrafterTile) {
 				INamedContainerProvider containerProvider = createContainerProvider(worldIn, pos);
-				
+				ModNetworkChannels.CHANNEL.sendToServer(new RequestState(pos));
 				NetworkHooks.openGui((ServerPlayerEntity)player, containerProvider, entity.getPos());
 			}else{
 				throw new IllegalStateException("Incorrect tile entity!");

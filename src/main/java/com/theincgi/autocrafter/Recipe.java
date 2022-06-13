@@ -62,6 +62,7 @@ public class Recipe {
 //			}
 		}else {
 			Utils.log("It seems "+iRecipe.getClass().toGenericString() + " isn't a supported recipe type.");
+			output = ItemStack.EMPTY; //no free items for unsupported :c
 		}
 		
 	}
@@ -88,8 +89,6 @@ public class Recipe {
 		if(opt.opts.size()==0 && itemStack.isEmpty()){return true;}
 		
 		for(ItemStack i : opt.opts){
-			Item item1 = i.getItem();
-			Item item2 = itemStack.getItem();
 			if(matches(i, itemStack))
 				return true;
 		}
@@ -209,11 +208,14 @@ public class Recipe {
 	}
 	public static boolean matches(ItemStack crafts, ItemStack stack) {
 		if(crafts.isEmpty()&&stack.isEmpty())return true;
-		if(!crafts.getItem().equals(stack.getItem())) return false;
+		
+		if(!crafts.isItemEqual(stack)) return false; //doesn't check nbt
+		if(!ItemStack.areItemStackTagsEqual(crafts, stack)) return false;
+		return true;
 		
 //		if(crafts.getItemDamage()==OreDictionary.WILDCARD_VALUE || stack.getItemDamage()==OreDictionary.WILDCARD_VALUE) return true;
 //		return crafts.getItemDamage()==stack.getItemDamage();
-		return false; //TODO TODO TODO
+//		return false; //TODO TODO TODO
 	}
 	@Override
 	public boolean equals(Object obj) {

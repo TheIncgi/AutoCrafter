@@ -20,7 +20,7 @@ public class ItemStackHandlerAutoCrafter extends ItemStackHandler {
 
 			if(simulate){
 				if(stack.getCount()<=space)
-					return ItemStack.EMPTY;
+					return ItemStack.EMPTY; //remainder none
 				ItemStack m = stack.copy();
 				m.shrink(space);
 				return m;
@@ -29,7 +29,7 @@ public class ItemStackHandlerAutoCrafter extends ItemStackHandler {
 				int newCount = getStackInSlot(slot).getCount()+stack.getCount();
 				newCount = Math.min(newCount, getStackInSlot(slot).getMaxStackSize());
 				if(getStackInSlot(slot).isEmpty()){
-					tac.setInventorySlotContents(slot, stack.copy().split(newCount));
+					setStackInSlot(slot, stack.copy().split(newCount));
 				}else{
 					getStackInSlot(slot).setCount(newCount);
 				}
