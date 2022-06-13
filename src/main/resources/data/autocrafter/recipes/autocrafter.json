@@ -1,0 +1,18 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		"LHL",
+		"GCG",
+		"RHR"
+	],
+	"key": {
+		"L": { "item": "minecraft:glowstone_dust" },
+		"H": { "item": "minecraft:hopper"         },
+		"G": { "item": "minecraft:gold_ingot"     },
+		"C": { "item": "minecraft:crafting_table" },
+		"R": { "item": "minecraft:redstone"       }
+	},
+	"result": {
+		"item": "autocrafter:autocrafter"
+	}
+}

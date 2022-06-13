@@ -4,64 +4,63 @@ import java.util.List;
 
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.item.crafting.ShapedRecipes;
-import net.minecraft.item.crafting.ShapelessRecipes;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.item.crafting.ShapedRecipe;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.NonNullList;
 import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.oredict.OreDictionary;
-import net.minecraftforge.oredict.ShapedOreRecipe;
-import net.minecraftforge.oredict.ShapelessOreRecipe;
+import net.minecraftforge.items.ItemStackHandler;
+
 
 public class Recipe {
 	ItemStack output;
 	public NonNullList<ItemOptions> items = NonNullList.withSize(9, ItemOptions.EMPTY);
 	
-	public void setRecipe(IRecipe iRecipe){
+	public void setRecipe(IRecipe<?> iRecipe){
 		output = iRecipe.getRecipeOutput();
 		for(int i = 0; i<items.size();i++){items.set(i, ItemOptions.EMPTY);}
-		if(iRecipe instanceof ShapedRecipes){
-			ShapedRecipes sr = (ShapedRecipes) iRecipe;
-			for (int i = 0; i < sr.recipeItems.length; i++) {
-				ItemStack s = sr.recipeItems[i];
-				if(s==null){s=ItemStack.EMPTY;}
-				items.set(realIndx(i, sr.recipeWidth, sr.recipeHeight), new ItemOptions(s));
+		if(iRecipe instanceof ShapedRecipe){
+			ShapedRecipe sr = (ShapedRecipe) iRecipe;
+			NonNullList<Ingredient> ing = sr.getIngredients();
+			for (int i = 0; i < ing.size(); i++) {
+				ItemStack[] s = ing.get(i).getMatchingStacks();
+				if(s==null){s=new ItemStack[0];}
+				items.set(realIndx(i, sr.getRecipeWidth(), sr.getRecipeHeight()), new ItemOptions(s));
 			}
-		}else if(iRecipe instanceof ShapedOreRecipe){
-			ShapedOreRecipe sor = (ShapedOreRecipe) iRecipe;
-			for(int i = 0; i<sor.getInput().length; i++){
-				Object o = sor.getInput()[i];
-				if(o==null){o=ItemStack.EMPTY;}
-				if(o instanceof List){
-					items.set(realIndx(i, sor.getWidth(), sor.getHeight()), new ItemOptions((List) o));
-				}
-				if(o instanceof ItemStack){
-					ItemStack is = (ItemStack) o;
-					items.set(realIndx(i, sor.getWidth(), sor.getHeight()), new ItemOptions(is));
-				}
-			}
-		}else if(iRecipe instanceof ShapelessRecipes){
-			ShapelessRecipes sr = (ShapelessRecipes) iRecipe;
-			for(int i = 0; i<sr.recipeItems.size(); i++){
-				items.set(i, new ItemOptions(sr.recipeItems.get(i)));
-			}
-		}else if(iRecipe instanceof ShapelessOreRecipe){
-			ShapelessOreRecipe slor = (ShapelessOreRecipe) iRecipe;
-			for (int i = 0; i < slor.getInput().size(); i++) {
-				Object o = slor.getInput().get(i);
-				if(o==null){o=ItemStack.EMPTY;}
-				if(o instanceof List){
-					items.set(i, new ItemOptions((List) o));
-				}
-				if(o instanceof ItemStack){
-					ItemStack is = (ItemStack) o;
-					items.set(i, new ItemOptions(is));
-				}
-			}
-		}else{
+//		}else if(iRecipe instanceof ShapedOreRecipe){
+//			ShapedOreRecipe sor = (ShapedOreRecipe) iRecipe;
+//			for(int i = 0; i<sor.getInput().length; i++){
+//				Object o = sor.getInput()[i];
+//				if(o==null){o=ItemStack.EMPTY;}
+//				if(o instanceof List){
+//					items.set(realIndx(i, sor.getWidth(), sor.getHeight()), new ItemOptions((List) o));
+//				}
+//				if(o instanceof ItemStack){
+//					ItemStack is = (ItemStack) o;
+//					items.set(realIndx(i, sor.getWidth(), sor.getHeight()), new ItemOptions(is));
+//				}
+//			}
+//		}else if(iRecipe instanceof ShapelessRecipes){
+//			ShapelessRecipes sr = (ShapelessRecipes) iRecipe;
+//			for(int i = 0; i<sr.recipeItems.size(); i++){
+//				items.set(i, new ItemOptions(sr.recipeItems.get(i)));
+//			}
+//		}else if(iRecipe instanceof ShapelessOreRecipe){
+//			ShapelessOreRecipe slor = (ShapelessOreRecipe) iRecipe;
+//			for (int i = 0; i < slor.getInput().size(); i++) {
+//				Object o = slor.getInput().get(i);
+//				if(o==null){o=ItemStack.EMPTY;}
+//				if(o instanceof List){
+//					items.set(i, new ItemOptions((List) o));
+//				}
+//				if(o instanceof ItemStack){
+//					ItemStack is = (ItemStack) o;
+//					items.set(i, new ItemOptions(is));
+//				}
+//			}
+		}else {
 			Utils.log("It seems "+iRecipe.getClass().toGenericString() + " isn't a supported recipe type.");
 		}
 		
@@ -78,7 +77,11 @@ public class Recipe {
 		if(opt.opts.size()==0){return ItemStack.EMPTY;}
 		long mod = (System.currentTimeMillis()/500)%opt.opts.size();
 		ItemStack is = opt.opts.get((int) mod);
-		return new ItemStack(is.getItem(), 1, is.getItemDamage()==OreDictionary.WILDCARD_VALUE?(int)mod%Math.max(1,is.getMaxDamage()):is.getItemDamage());
+		return new ItemStack(
+			is.getItem(), 
+			1
+			//,	is.getItemDamage()==OreDictionary.WILDCARD_VALUE?(int)mod%Math.max(1,is.getMaxDamage()):is.getItemDamage()
+		);
 	}
 	public boolean matchesRecipe(int slot, ItemStack itemStack){
 		ItemOptions opt = items.get(slot);
@@ -93,23 +96,24 @@ public class Recipe {
 		return false;
 	}
 	
-	public NBTTagList getNBT(){
-		NBTTagList list = new NBTTagList();
-		list.appendTag(getOutput().serializeNBT());
+	public ListNBT getNBT(){
+		ListNBT list = new ListNBT();
+		list.add(getOutput().serializeNBT());
 		for(int i = 0; i<items.size(); i++){
-			NBTTagCompound slot = new NBTTagCompound();
-			slot.setTag("item", items.get(i).getNBT());
-			list.appendTag(slot);
+			CompoundNBT slot = new CompoundNBT();
+			slot.put("item", items.get(i).getNBT());
+			list.add(slot);
 		}
 		return list;
 	}
-	public static Recipe fromNBT(NBTTagList tags){
+	public static Recipe fromNBT(ListNBT tags){
 		Recipe recipe = new Recipe();
-		recipe.output = new ItemStack(tags.getCompoundTagAt(0));
-		for(int i = 1; i<tags.tagCount(); i++){
-			NBTTagCompound slot = tags.getCompoundTagAt(i);
+		
+		recipe.output = ItemStack.read(tags.getCompound(0));
+		for(int i = 1; i<tags.size(); i++){
+			CompoundNBT slot = tags.getCompound(i);
 			int index = i;
-			ItemOptions opts = ItemOptions.fromNBT(slot.getTagList("item", 10));
+			ItemOptions opts = ItemOptions.fromNBT(slot.getList("item", 10));
 			recipe.items.set(index-1, opts);
 		}
 		return recipe;
@@ -120,11 +124,11 @@ public class Recipe {
 		NonNullList<ItemStack> opts = NonNullList.create();
 		public ItemOptions(){}
 		
-		public static ItemOptions fromNBT(NBTTagList tagList) {
+		public static ItemOptions fromNBT(ListNBT tagList) {
 			ItemOptions opts = new ItemOptions();
-			for(int i = 0; i<tagList.tagCount(); i++){
-				NBTTagCompound itemTag = tagList.getCompoundTagAt(i);
-				opts.opts.add(new ItemStack(itemTag));
+			for(int i = 0; i<tagList.size(); i++){
+				CompoundNBT itemTag = tagList.getCompound(i);
+				opts.opts.add(ItemStack.read(itemTag));
 			}
 			return opts;
 		}
@@ -143,10 +147,15 @@ public class Recipe {
 				this.opts.add(opts.get(i));
 			}
 		}
-		public NBTTagList getNBT() {
-			NBTTagList list = new NBTTagList();
+		public ItemOptions(ItemStack[] opts){
+			for (int i = 0; i < opts.length; i++) {
+				this.opts.add(opts[i]);
+			}
+		}
+		public ListNBT getNBT() {
+			ListNBT list = new ListNBT();
 			for(int i = 0; i<opts.size(); i++){
-				list.appendTag(opts.get(i).serializeNBT());
+				list.add(opts.get(i).serializeNBT());
 			}
 			return list;
 		}
@@ -186,7 +195,7 @@ public class Recipe {
 			s+="\ti: "+i+" = {";
 			for (int j = 0; j < opts.opts.size(); j++) {
 				s+= opts.opts.get(j).getItem().getRegistryName().toString() + " : ";
-				s+= opts.opts.get(j).getItemDamage();
+				s+= opts.opts.get(j).serializeNBT().toString();
 				if(j<opts.opts.size()-1){
 					s+=", ";
 				}
@@ -201,8 +210,10 @@ public class Recipe {
 	public static boolean matches(ItemStack crafts, ItemStack stack) {
 		if(crafts.isEmpty()&&stack.isEmpty())return true;
 		if(!crafts.getItem().equals(stack.getItem())) return false;
-		if(crafts.getItemDamage()==OreDictionary.WILDCARD_VALUE || stack.getItemDamage()==OreDictionary.WILDCARD_VALUE) return true;
-		return crafts.getItemDamage()==stack.getItemDamage();
+		
+//		if(crafts.getItemDamage()==OreDictionary.WILDCARD_VALUE || stack.getItemDamage()==OreDictionary.WILDCARD_VALUE) return true;
+//		return crafts.getItemDamage()==stack.getItemDamage();
+		return false; //TODO TODO TODO
 	}
 	@Override
 	public boolean equals(Object obj) {
@@ -217,11 +228,11 @@ public class Recipe {
 	
 	
 	/**to is exclusive*/
-	public NonNullList<ItemStack> getLeftovers(NonNullList<ItemStack> inv, int from, int to){
+	public NonNullList<ItemStack> getLeftovers(ItemStackHandler inv, int from, int to){
 		NonNullList<ItemStack> ret = NonNullList.withSize(to-from, ItemStack.EMPTY);
         for (int i = from; i < to; i++)
         {
-            ret.set(i, ForgeHooks.getContainerItem(inv.get(i)));
+            ret.set(i, ForgeHooks.getContainerItem(inv.getStackInSlot(i)));
         }
         return ret;
 	}

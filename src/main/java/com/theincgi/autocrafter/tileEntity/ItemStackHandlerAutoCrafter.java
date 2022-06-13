@@ -1,31 +1,21 @@
 package com.theincgi.autocrafter.tileEntity;
 
 import com.theincgi.autocrafter.Recipe;
-import com.theincgi.autocrafter.Utils;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumFacing;
-import net.minecraftforge.items.IItemHandler;
+import net.minecraft.util.Direction;
+import net.minecraftforge.items.ItemStackHandler;
 
-public class ItemStackHandlerAutoCrafter implements IItemHandler{
-	private TileAutoCrafter tac;
-	public ItemStackHandlerAutoCrafter(TileAutoCrafter tac) {
+public class ItemStackHandlerAutoCrafter extends ItemStackHandler {
+	private AutoCrafterTile tac;
+	public ItemStackHandlerAutoCrafter(AutoCrafterTile tac) {
+		super(11);
 		this.tac = tac;
 	}
 
 	@Override
-	public int getSlots() {
-		return 11;
-	}
-
-	@Override
-	public ItemStack getStackInSlot(int slot) {
-		return tac.getStackInSlot(slot);
-	}
-
-	@Override
 	public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-		if(tac.canInsertItem(slot, stack, EnumFacing.UP)){
+		if(tac.canInsertItem(slot, stack, Direction.UP)){
 			int space = getSpaceFor(slot, stack);
 
 			if(simulate){
@@ -39,7 +29,7 @@ public class ItemStackHandlerAutoCrafter implements IItemHandler{
 				int newCount = getStackInSlot(slot).getCount()+stack.getCount();
 				newCount = Math.min(newCount, getStackInSlot(slot).getMaxStackSize());
 				if(getStackInSlot(slot).isEmpty()){
-					tac.setInventorySlotContents(slot, stack.copy().splitStack(newCount));
+					tac.setInventorySlotContents(slot, stack.copy().split(newCount));
 				}else{
 					getStackInSlot(slot).setCount(newCount);
 				}
@@ -54,9 +44,20 @@ public class ItemStackHandlerAutoCrafter implements IItemHandler{
 	}
 
 	@Override
+	protected void onContentsChanged(int slot) {
+		tac.markDirty();
+	}
+	@Override
+	public boolean isItemValid(int slot, ItemStack stack) {
+//		return true;
+		return getSpaceFor(slot, stack) > 0;
+	}
+	
+	
+	@Override
 	public ItemStack extractItem(int slot, int amount, boolean simulate) {
 		ItemStack stackIn = getStackInSlot(slot);
-		if(tac.canExtractItem(slot, stackIn, EnumFacing.DOWN)){
+		if(tac.canExtractItem(slot, stackIn, Direction.DOWN)){
 			if(simulate){
 				return tac.SIMULATEdecrStackSize(slot, amount);
 			}else{
@@ -84,5 +85,7 @@ public class ItemStackHandlerAutoCrafter implements IItemHandler{
 	public int getSlotLimit(int slot) {
 		return getStackInSlot(slot).getMaxStackSize();
 	}
+
+	
 
 }
