@@ -7,6 +7,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.item.crafting.ShapedRecipe;
+import net.minecraft.item.crafting.ShapelessRecipe;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.NonNullList;
@@ -42,11 +43,12 @@ public class Recipe {
 //					items.set(realIndx(i, sor.getWidth(), sor.getHeight()), new ItemOptions(is));
 //				}
 //			}
-//		}else if(iRecipe instanceof ShapelessRecipes){
-//			ShapelessRecipes sr = (ShapelessRecipes) iRecipe;
-//			for(int i = 0; i<sr.recipeItems.size(); i++){
-//				items.set(i, new ItemOptions(sr.recipeItems.get(i)));
-//			}
+		}else if(iRecipe instanceof ShapelessRecipe){
+			ShapelessRecipe sr = (ShapelessRecipe) iRecipe;
+			
+			for(int i = 0; i<sr.getIngredients().size(); i++){
+				items.set(i, new ItemOptions(sr.getIngredients().get(i).getMatchingStacks()));
+			}
 //		}else if(iRecipe instanceof ShapelessOreRecipe){
 //			ShapelessOreRecipe slor = (ShapelessOreRecipe) iRecipe;
 //			for (int i = 0; i < slor.getInput().size(); i++) {
