@@ -31,7 +31,8 @@ public class Utils {
 	}
 	public static List<IRecipe<?>> getValid(ItemStack sItem){
 		ArrayList<IRecipe<?>> out = new ArrayList<IRecipe<?>>();
-		
+		sItem = sItem.copy();
+		sItem.setCount(1);
 		Collection<IRecipe<?>> recipes = getRecipeManager().getRecipes();
 		for (IRecipe<?> iRecipe : recipes) {
 			ItemStack is = iRecipe.getRecipeOutput();

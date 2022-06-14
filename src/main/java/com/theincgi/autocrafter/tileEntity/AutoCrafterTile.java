@@ -2,6 +2,7 @@ package com.theincgi.autocrafter.tileEntity;
 
 import java.util.List;
 
+import com.theincgi.autocrafter.AutoCrafterMod;
 import com.theincgi.autocrafter.Recipe;
 import com.theincgi.autocrafter.Utils;
 
@@ -36,7 +37,8 @@ public class AutoCrafterTile extends TileEntity implements ITickableTileEntity, 
 	private List<IRecipe<?>> recipes;
 
 	private ItemStackHandlerAutoCrafter ishac;
-	private final LazyOptional<IItemHandler> handler = LazyOptional.of(()->ishac);
+	private final LazyOptional<IItemHandler> handlerRestricted = LazyOptional.of(()-> new RestrictedItemStackHandler( ishac ));
+	private final LazyOptional<IItemHandler> handler = LazyOptional.of(()-> ishac );
 	
 	public AutoCrafterTile(TileEntityType<?> tileEntityType) {
 		super(tileEntityType);
@@ -56,14 +58,18 @@ public class AutoCrafterTile extends TileEntity implements ITickableTileEntity, 
 	@Override
 	public <T> LazyOptional<T> getCapability(Capability<T> capability, Direction facing) {
 		if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
-			return handler.cast();
+			if( facing == null )
+				return handler.cast();
+			return handlerRestricted.cast();
 		}
+		
 		return super.getCapability(capability, facing);
 	}
 	
 	
 	@Override
 	public CompoundNBT write(CompoundNBT compound) {
+		AutoCrafterMod.LOGGER.debug("WRITE NBT");
 		compound = super.write(compound);
 		if(customName!=null)
 			compound.putString("customName", customName);
@@ -74,10 +80,11 @@ public class AutoCrafterTile extends TileEntity implements ITickableTileEntity, 
 		compound.put("crafts", crafts.serializeNBT());
 		return compound;
 	}
-	
 
 	@Override
 	public void read(BlockState state, CompoundNBT nbt) {
+		super.read(state, nbt);
+		AutoCrafterMod.LOGGER.debug("READ NBT");
 		if(nbt.contains("customName"))
 			customName = nbt.getString("customName");
 		if(nbt.contains("inventory")) {
@@ -133,13 +140,7 @@ public class AutoCrafterTile extends TileEntity implements ITickableTileEntity, 
 
 	@Override
 	public void setInventorySlotContents(int index, ItemStack stack) {
-		ItemStack itemstack = (ItemStack)this.ishac.getStackInSlot(index);
-		this.ishac.setStackInSlot(index, itemstack);
-
-		if (stack.getCount() > this.getInventoryStackLimit())
-		{
-			stack.setCount(this.getInventoryStackLimit());
-		}
+		this.ishac.setStackInSlot(index, stack);
 
 		this.markDirty();
 	}
@@ -182,7 +183,7 @@ public class AutoCrafterTile extends TileEntity implements ITickableTileEntity, 
 
 	public boolean isSlotAllowed(int index, ItemStack itemStack){
 		//System.out.printf("isSlotAllowed: %d %s %s\n",index, itemStack.getItem().getRegistryName().toString(), (index<9 && recipe.matchesRecipe(index, itemStack))+"");
-		return index<9 && recipe.matchesRecipe(index, itemStack);
+		return itemStack.isEmpty() || index<9 && recipe.matchesRecipe(index, itemStack);
 	}
 	@Override
 	public boolean canInsertItem(int index, ItemStack itemStackIn, Direction direction) {
@@ -195,6 +196,11 @@ public class AutoCrafterTile extends TileEntity implements ITickableTileEntity, 
 		return index==OUTPUT_SLOT || (index<9&&!recipe.matchesRecipe(index, stack));
 	}
 	
+	public boolean canExtractItem(int index, int amount, Direction direction) {
+		ItemStack x = ishac.getStackInSlot(index).copy();
+		x.setCount(amount);
+		return canExtractItem(index, x, direction);
+	}
 
 
 
@@ -202,7 +208,7 @@ public class AutoCrafterTile extends TileEntity implements ITickableTileEntity, 
 		this.customName = displayName;
 		markDirty();
 	}
-	public void setRecipe(IRecipe recipe) {
+	public void setRecipe(IRecipe<?> recipe) {
 		this.recipe.setRecipe(recipe);
 		markDirty();
 	}
@@ -278,7 +284,7 @@ public class AutoCrafterTile extends TileEntity implements ITickableTileEntity, 
 			}
 			if(!leftovers.get(i).isEmpty()){
 				if(ishac.getStackInSlot(i).isEmpty()){
-					setInventorySlotContents(i, leftovers.get(i));
+					ishac.setStackInSlot(i, leftovers.get(i));
 				}else{
 					InventoryHelper.spawnItemStack(world, pos.getX(), pos.getY(), pos.getZ(), leftovers.get(i)); //drop in world if no space
 					//This is incase something happens like a stack of 16 milk buckets finds its way into the inventory
@@ -293,6 +299,7 @@ public class AutoCrafterTile extends TileEntity implements ITickableTileEntity, 
 		markDirty();
 	}
 	private void distibuteItems() {
+		boolean moved = false;
 		for(int i = 0; i<9; i++){
 			ItemStack current = getStackInSlot(i);
 			if(current.isEmpty())continue;
@@ -302,13 +309,18 @@ public class AutoCrafterTile extends TileEntity implements ITickableTileEntity, 
 			if(getStackInSlot(nextMatch).isEmpty()){
 				if(current.getCount()>=2){
 					ishac.setStackInSlot(nextMatch, current.split(1));
+					moved = true;
 				}
 			}else{
 				if(current.getCount()>getStackInSlot(nextMatch).getCount()){
 					current.shrink(1);
 					getStackInSlot(nextMatch).grow(1);
+					moved = true;
 				}
 			}
+		}
+		if(moved) {
+			//TODO play a shuffling sound
 		}
 	}
 	private int nextMatch(int j){

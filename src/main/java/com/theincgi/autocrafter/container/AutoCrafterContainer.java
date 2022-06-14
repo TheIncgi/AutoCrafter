@@ -19,12 +19,8 @@ import net.minecraftforge.items.wrapper.InvWrapper;
 
 public class AutoCrafterContainer extends Container {
 
-	private final PlayerEntity playerEntity;
 	private IItemHandler playerInventory;
-
 	private AutoCrafterTile tileEntity;
-
-	private ItemStack lastTarget = null;
 	public SlotItemHandler targetSlot;
 
 
@@ -34,7 +30,6 @@ public class AutoCrafterContainer extends Container {
 		TileEntity te = world.getTileEntity(pos);
 		if(te instanceof AutoCrafterTile)
 			this.tileEntity = (AutoCrafterTile) te;
-		this.playerEntity = player;
 		this.playerInventory = new InvWrapper(playerInventory);
 
 		if(tileEntity != null) {
@@ -174,37 +169,5 @@ public class AutoCrafterContainer extends Container {
 		}
 		return previous;
 	}
-
-	private ItemStack moveToCatagory(Slots catagory, PlayerInventory inventory, ItemStack containerStack){
-		for(int i = catagory.getStart(); i<=catagory.getEnd(); i++){
-			ItemStack invStack = inventory.getStackInSlot(i);
-			if(invStack.equals(containerStack,false)){
-				int addable = Math.min(invStack.getMaxStackSize()-invStack.getCount(), containerStack.getCount());
-				if(addable>0){
-					invStack.setCount(invStack.getCount()+addable);
-					containerStack.setCount(containerStack.getCount()-addable);
-					if(containerStack.getCount()==0)
-						return ItemStack.EMPTY;
-					return containerStack;
-				}
-			}
-		}
-		for(int i = catagory.getStart(); i<=catagory.getEnd(); i++){
-			ItemStack invStack = inventory.getStackInSlot(i);
-			if(invStack.isEmpty()){
-				inventory.mainInventory.set(i-Slots.PLAYERINV.getStart(), containerStack);
-				containerStack.setCount(0);
-				if(containerStack.getCount()==0)
-					return ItemStack.EMPTY;
-				return containerStack;
-			}
-		}
-		return containerStack;
-	}
-
-	
-
-	
-
 
 }

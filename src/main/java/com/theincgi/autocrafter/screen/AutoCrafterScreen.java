@@ -141,27 +141,24 @@ public class AutoCrafterScreen extends ContainerScreen<AutoCrafterContainer>{
 	
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
-		boolean consumed = super.mouseClicked(mouseX, mouseY, mouseButton);
+		
 		int x = width/2-GUIWID/2;
 		int y = height/2-GUIHEI/2;
 		
-//		int playerDim = getMinecraft().player.dimension;
 		if(prev.isInBounds(mouseX-x, mouseY-y)){
 			ModNetworkChannels.CHANNEL.sendToServer(new TargetCycledPacket(CycleDir.PREV, container.getTileEntity().getPos()));
+			return true;
 		}else if(next.isInBounds(mouseX-x, mouseY-y)){
 			ModNetworkChannels.CHANNEL.sendToServer(new TargetCycledPacket(CycleDir.NEXT, container.getTileEntity().getPos()));
+			return true;
 		}else if(container.targetSlot.equals(getSlotUnderMouse())){
 			@SuppressWarnings("resource")
 			ItemStack held = getMinecraft().player.inventory.getItemStack();
 			ModNetworkChannels.CHANNEL.sendToServer(new TargetChangedPacket(held, container.getTileEntity().getPos()));
-//			@SuppressWarnings("resource")
-//			ItemStack put = getMinecraft().player.inventory.getItemStack().copy();
-//			put.setCount(1);
-//			container.targetSlot.putStack( put );
+			return true;
 		}
-//		if(Input(GLFW.GLFW_KEY_LEFT_SHIFT))
-			System.out.println(container.getTileEntity().getRecipe()); 
-		return consumed;
+		
+		return super.mouseClicked(mouseX, mouseY, mouseButton);
 	}
 	@Override
 	protected void drawGuiContainerBackgroundLayer(MatrixStack matrixStack, float partialTicks, int mouseX, int mouseY) {

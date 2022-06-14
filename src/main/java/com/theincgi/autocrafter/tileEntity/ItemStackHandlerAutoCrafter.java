@@ -7,7 +7,7 @@ import net.minecraft.util.Direction;
 import net.minecraftforge.items.ItemStackHandler;
 
 public class ItemStackHandlerAutoCrafter extends ItemStackHandler {
-	private AutoCrafterTile tac;
+	protected AutoCrafterTile tac;
 	public ItemStackHandlerAutoCrafter(AutoCrafterTile tac) {
 		super(11);
 		this.tac = tac;
@@ -57,15 +57,17 @@ public class ItemStackHandlerAutoCrafter extends ItemStackHandler {
 	@Override
 	public ItemStack extractItem(int slot, int amount, boolean simulate) {
 		ItemStack stackIn = getStackInSlot(slot);
-		if(tac.canExtractItem(slot, stackIn, Direction.DOWN)){
+//		if(tac.canExtractItem(slot, stackIn, Direction.DOWN)){
 			if(simulate){
 				return tac.SIMULATEdecrStackSize(slot, amount);
 			}else{
 				return tac.decrStackSize(slot, amount);
 			}
-		}
-		return ItemStack.EMPTY;
+//		}
+//		return ItemStack.EMPTY;
 	}
+	
+	
 
 	public int getSpaceFor(int indx, ItemStack s){
 		if(!tac.getRecipe().matchesRecipe(indx, s)){

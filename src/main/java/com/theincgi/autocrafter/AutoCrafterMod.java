@@ -37,7 +37,7 @@ public class AutoCrafterMod {
 	public static final String
 		MODID = "autocrafter",
 		VERSION = "1.6";
-	private static final Logger LOGGER = LogManager.getLogger();
+	public static final Logger LOGGER = LogManager.getLogger();
 	
 	
 //	public static AutoCrafterMod instance;
