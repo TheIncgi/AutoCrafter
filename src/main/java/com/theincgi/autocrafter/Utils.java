@@ -6,8 +6,16 @@ import java.util.List;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.BlastingRecipe;
+import net.minecraft.item.crafting.CampfireCookingRecipe;
+import net.minecraft.item.crafting.FurnaceRecipe;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.RecipeManager;
+import net.minecraft.item.crafting.RepairItemRecipe;
+import net.minecraft.item.crafting.SmithingRecipe;
+import net.minecraft.item.crafting.SmokingRecipe;
+import net.minecraft.item.crafting.StonecuttingRecipe;
+import net.minecraft.item.crafting.TippedArrowRecipe;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
 
@@ -35,8 +43,18 @@ public class Utils {
 		sItem.setCount(1);
 		Collection<IRecipe<?>> recipes = getRecipeManager(worldIn).getRecipes();
 		for (IRecipe<?> iRecipe : recipes) {
+			if(iRecipe instanceof FurnaceRecipe ) continue;
+			if(iRecipe instanceof BlastingRecipe ) continue;
+			if(iRecipe instanceof SmithingRecipe ) continue;
+			if(iRecipe instanceof SmokingRecipe ) continue;
+			if(iRecipe instanceof BlastingRecipe ) continue;
+			if(iRecipe instanceof CampfireCookingRecipe ) continue;
+			if(iRecipe instanceof BlastingRecipe ) continue;
+			if(iRecipe instanceof RepairItemRecipe ) continue;
+			if(iRecipe instanceof StonecuttingRecipe ) continue;
+			
 			ItemStack is = iRecipe.getRecipeOutput();
-			if(sItem.equals(is,false)){
+			if(sItem.isItemEqual(is)){
 				out.add(iRecipe);
 			}
 		}
