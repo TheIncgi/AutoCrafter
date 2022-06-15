@@ -20,6 +20,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.NonNullList;
+import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -39,6 +40,7 @@ public class AutoCrafterTile extends TileEntity implements ITickableTileEntity, 
 	private ItemStackHandlerAutoCrafter ishac;
 	private final LazyOptional<IItemHandler> handlerRestricted = LazyOptional.of(()-> new RestrictedItemStackHandler( ishac ));
 	private final LazyOptional<IItemHandler> handler = LazyOptional.of(()-> ishac );
+	private int redistributionCyclesRemaning = 8;
 	
 	public AutoCrafterTile(TileEntityType<?> tileEntityType) {
 		super(tileEntityType);
@@ -54,6 +56,9 @@ public class AutoCrafterTile extends TileEntity implements ITickableTileEntity, 
 		return true;
 	}
 	
+	public void triggerRedistibution() {
+		redistributionCyclesRemaning = 8;
+	}
 	
 	@Override
 	public <T> LazyOptional<T> getCapability(Capability<T> capability, Direction facing) {
@@ -208,20 +213,20 @@ public class AutoCrafterTile extends TileEntity implements ITickableTileEntity, 
 		this.customName = displayName;
 		markDirty();
 	}
-	public void setRecipe(IRecipe<?> recipe) {
-		this.recipe.setRecipe(recipe);
+	public void setRecipe(IRecipe<?> recipe, World worldIn) {
+		this.recipe.setRecipe(recipe, worldIn);
 		markDirty();
 	}
 	public void setRecipe(ListNBT recipeTag){
 		recipe = Recipe.fromNBT(recipeTag);
 		markDirty();
 	}
-	public void updateRecipes(ItemStack crafts, int index) {
+	public void updateRecipes(ItemStack crafts, int index, World worldIn) {
 		this.crafts = crafts;
-		recipes = Utils.getValid(crafts);
+		recipes = Utils.getValid(crafts, world);
 		currentRecipeIndex = index%Math.max(1,recipes.size());
 		if(recipes.size()>0)
-			setRecipe(recipes.get(currentRecipeIndex));
+			setRecipe(recipes.get(currentRecipeIndex), worldIn);
 		else
 			recipe.clearRecipe();
 		markDirty();
@@ -239,23 +244,23 @@ public class AutoCrafterTile extends TileEntity implements ITickableTileEntity, 
 	private int currentRecipeIndex = 0;
 
 	/**Called from server packet, then client is notified to do the same*/
-	public void nextRecipe() {
+	public void nextRecipe(World worldIn) {
 
-		if(recipes==null){updateRecipes(getCrafts(), currentRecipeIndex);}
+		if(recipes==null){updateRecipes(getCrafts(), currentRecipeIndex, worldIn);}
 		if(recipes.size()==0){return;}
 		currentRecipeIndex++;
 		currentRecipeIndex%=recipes.size();
-		setRecipe(recipes.get(currentRecipeIndex));
+		setRecipe(recipes.get(currentRecipeIndex), worldIn);
 	}
 	/**Called from server packet, then client is notified to do the same*/
-	public void prevRecipe(){
-		if(recipes==null){updateRecipes(getCrafts(), currentRecipeIndex);}
+	public void prevRecipe(World worldIn){
+		if(recipes==null){updateRecipes(getCrafts(), currentRecipeIndex, worldIn);}
 		if(recipes.size()==0){return;}
 		currentRecipeIndex--;
 		if(currentRecipeIndex<0){
 			currentRecipeIndex=recipes.size()-1;
 		}
-		setRecipe(recipes.get(currentRecipeIndex));
+		setRecipe(recipes.get(currentRecipeIndex), worldIn);
 	}
 	public int getCurrentRecipeIndex() {
 		return currentRecipeIndex;
@@ -264,18 +269,23 @@ public class AutoCrafterTile extends TileEntity implements ITickableTileEntity, 
 	@Override
 	public void tick() {
 		//return if powered by redstone
+		if( redistributionCyclesRemaning < 0 ) return; //not recently shuffled
 		if(world.isBlockPowered(pos)||world.getRedstonePowerFromNeighbors(pos)>0){return;}
 		
 		if(recipe.getOutput().isEmpty()){return;}
 		if(getStackInSlot(OUTPUT_SLOT).getCount()+recipe.getOutput().getCount()>recipe.getOutput().getMaxStackSize()){return;}
 		if(!Recipe.matches(getStackInSlot(OUTPUT_SLOT), recipe.getOutput()) && !getStackInSlot(OUTPUT_SLOT).isEmpty()){return;}
 
-		distibuteItems();
-
+		if( distibuteItems() ) return; //craft on ticks where items were not moved
+		
+		redistributionCyclesRemaning--; //to -1
+		
 		for(int i = 0; i<9; i++){
 			if(!recipe.matchesRecipe(i, ishac.getStackInSlot(i))){
-				return;}
+				return;
+			}
 		}
+		triggerRedistibution(); //a valid item is being crafted
 		NonNullList<ItemStack> leftovers = recipe.getLeftovers(ishac, 0, 9); //9, exclusive
 		for(int i = 0; i<9; i++){
 			ishac.getStackInSlot(i).shrink(1);
@@ -298,7 +308,11 @@ public class AutoCrafterTile extends TileEntity implements ITickableTileEntity, 
 		}
 		markDirty();
 	}
-	private void distibuteItems() {
+	private boolean distibuteItems() {
+		if(redistributionCyclesRemaning > 0)
+			redistributionCyclesRemaning--;
+		else
+			return false;
 		boolean moved = false;
 		for(int i = 0; i<9; i++){
 			ItemStack current = getStackInSlot(i);
@@ -306,22 +320,38 @@ public class AutoCrafterTile extends TileEntity implements ITickableTileEntity, 
 
 			int nextMatch = nextMatch(i);
 			if(nextMatch<0)continue;
-			if(getStackInSlot(nextMatch).isEmpty()){
-				if(current.getCount()>=2){
+			ItemStack nextStack = ishac.getStackInSlot(nextMatch);
+			if(nextStack.isEmpty()){
+				if(current.getCount()>=1){
 					ishac.setStackInSlot(nextMatch, current.split(1));
 					moved = true;
 				}
 			}else{
-				if(current.getCount()>getStackInSlot(nextMatch).getCount()){
-					current.shrink(1);
-					getStackInSlot(nextMatch).grow(1);
-					moved = true;
-				}
+				int curCount = current.getCount();
+				int nexCount = nextStack.getCount();
+				boolean isWrapped = nextMatch < i;
+//				if( isWrapped ) {
+					if( nexCount==0 )
+						if(ItemStack.areItemsEqual(current, nextStack)) {
+							current.shrink(1);
+							getStackInSlot(nextMatch).grow(1);
+							moved = true;
+						}
+//				}else {
+//					if( nexCount == 0 ){
+//						if(ItemStack.areItemsEqual(current, nextStack)) {
+//							current.shrink(1);
+//							getStackInSlot(nextMatch).grow(1);
+//							moved = true;
+//						}
+//					}					
+//				}
 			}
 		}
 		if(moved) {
 			//TODO play a shuffling sound
 		}
+		return moved;
 	}
 	private int nextMatch(int j){
 		ItemStack is = getStackInSlot(j);

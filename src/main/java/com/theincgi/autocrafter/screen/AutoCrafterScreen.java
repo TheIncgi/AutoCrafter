@@ -1,31 +1,21 @@
 package com.theincgi.autocrafter.screen;
 
-import static com.theincgi.autocrafter.Utils.getMinecraft;
-
-import java.io.IOException;
-import java.nio.channels.NetworkChannel;
-
-import org.lwjgl.glfw.GLFW;
-
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.GlStateManager.DestFactor;
 import com.mojang.blaze3d.platform.GlStateManager.SourceFactor;
 import com.theincgi.autocrafter.AutoCrafterMod;
-import com.theincgi.autocrafter.Utils;
 import com.theincgi.autocrafter.container.AutoCrafterContainer;
 import com.theincgi.autocrafter.network.ModNetworkChannels;
 import com.theincgi.autocrafter.network.packets.TargetChangedPacket;
 import com.theincgi.autocrafter.network.packets.TargetCycledPacket;
 import com.theincgi.autocrafter.network.packets.TargetCycledPacket.CycleDir;
 
-import net.java.games.input.Keyboard;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.util.InputMappings.Input;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;

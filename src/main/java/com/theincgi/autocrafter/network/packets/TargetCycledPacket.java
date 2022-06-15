@@ -50,9 +50,9 @@ public class TargetCycledPacket {
 				if( e instanceof AutoCrafterTile ) {
 					AutoCrafterTile eTile = (AutoCrafterTile) e;
 					if(message.cycleDir.equals(CycleDir.NEXT))
-						eTile.nextRecipe();
+						eTile.nextRecipe(worldIn);
 					else if(message.cycleDir.equals(CycleDir.PREV))
-						eTile.prevRecipe();
+						eTile.prevRecipe(worldIn);
 					NotifyPlayerTargetChangedPacket update = new NotifyPlayerTargetChangedPacket(eTile.getCrafts(), eTile.getCurrentRecipeIndex(), blockPos);
 					ModNetworkChannels.CHANNEL.sendTo(update, player.connection.netManager, NetworkDirection.PLAY_TO_CLIENT);
 					//TODO broadcast?

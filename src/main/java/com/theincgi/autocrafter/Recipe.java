@@ -4,6 +4,7 @@ import java.util.List;
 
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.BlastingRecipe;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.item.crafting.ShapedRecipe;
@@ -11,6 +12,7 @@ import net.minecraft.item.crafting.ShapelessRecipe;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.NonNullList;
+import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.items.ItemStackHandler;
 
@@ -19,7 +21,7 @@ public class Recipe {
 	ItemStack output;
 	public NonNullList<ItemOptions> items = NonNullList.withSize(9, ItemOptions.EMPTY);
 	
-	public void setRecipe(IRecipe<?> iRecipe){
+	public void setRecipe(IRecipe<?> iRecipe, World worldIn){
 		output = iRecipe.getRecipeOutput();
 		for(int i = 0; i<items.size();i++){items.set(i, ItemOptions.EMPTY);}
 		if(iRecipe instanceof ShapedRecipe){
@@ -49,6 +51,10 @@ public class Recipe {
 			for(int i = 0; i<sr.getIngredients().size(); i++){
 				items.set(i, new ItemOptions(sr.getIngredients().get(i).getMatchingStacks()));
 			}
+			
+		if( iRecipe instanceof BlastingRecipe ) {
+			output = ItemStack.EMPTY;
+		}
 //		}else if(iRecipe instanceof ShapelessOreRecipe){
 //			ShapelessOreRecipe slor = (ShapelessOreRecipe) iRecipe;
 //			for (int i = 0; i < slor.getInput().size(); i++) {
@@ -63,7 +69,7 @@ public class Recipe {
 //				}
 //			}
 		}else {
-			Utils.log("It seems "+iRecipe.getClass().toGenericString() + " isn't a supported recipe type.");
+			Utils.log("It seems "+iRecipe.getClass().toGenericString() + " isn't a supported recipe type.", worldIn);
 			output = ItemStack.EMPTY; //no free items for unsupported :c
 		}
 		

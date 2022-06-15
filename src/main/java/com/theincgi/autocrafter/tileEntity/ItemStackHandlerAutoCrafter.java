@@ -16,6 +16,7 @@ public class ItemStackHandlerAutoCrafter extends ItemStackHandler {
 	@Override
 	public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
 		if(tac.canInsertItem(slot, stack, Direction.UP)){
+			tac.triggerRedistibution();
 			int space = getSpaceFor(slot, stack);
 
 			if(simulate){
@@ -61,6 +62,7 @@ public class ItemStackHandlerAutoCrafter extends ItemStackHandler {
 			if(simulate){
 				return tac.SIMULATEdecrStackSize(slot, amount);
 			}else{
+				tac.triggerRedistibution();
 				return tac.decrStackSize(slot, amount);
 			}
 //		}

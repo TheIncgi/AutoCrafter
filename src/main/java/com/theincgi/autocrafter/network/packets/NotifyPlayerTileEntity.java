@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import com.theincgi.autocrafter.Utils;
 import com.theincgi.autocrafter.tileEntity.AutoCrafterTile;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -41,7 +42,7 @@ public class NotifyPlayerTileEntity {
 		NetworkEvent.Context ctx = context.get();
 		ctx.enqueueWork(()->{
 			@SuppressWarnings("resource")
-			ClientPlayerEntity player = Utils.getMinecraft().player;
+			ClientPlayerEntity player = Minecraft.getInstance().player;
 			World worldIn = player.world; //server world
 			BlockPos blockPos = message.pos;
 			

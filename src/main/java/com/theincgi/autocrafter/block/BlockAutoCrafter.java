@@ -1,7 +1,10 @@
 package com.theincgi.autocrafter.block;
 
+import com.theincgi.autocrafter.AutoCrafterMod;
+import com.theincgi.autocrafter.Utils;
 import com.theincgi.autocrafter.container.AutoCrafterContainer;
 import com.theincgi.autocrafter.network.ModNetworkChannels;
+import com.theincgi.autocrafter.network.packets.NotifyPlayerTileEntity;
 import com.theincgi.autocrafter.network.packets.RequestState;
 import com.theincgi.autocrafter.tileEntity.AutoCrafterTile;
 import com.theincgi.autocrafter.tileEntity.ModTileEntities;
@@ -30,9 +33,10 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ToolType;
+import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.NetworkHooks;
 
-public class BlockAutoCrafter extends ContainerBlock{
+public class BlockAutoCrafter extends ContainerBlock {
 	
 	public BlockAutoCrafter() {
 		super( AbstractBlock.Properties
@@ -67,11 +71,17 @@ public class BlockAutoCrafter extends ContainerBlock{
 	public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player,
 			Hand handIn, BlockRayTraceResult hit) {
 		
-		if(!worldIn.isRemote) {
+		AutoCrafterMod.LOGGER.debug("Side isRemote? "+worldIn.isRemote);
+		if( Utils.isServer( worldIn ) ) {
 			TileEntity entity = worldIn.getTileEntity(pos);
+			
 			if(entity instanceof AutoCrafterTile) {
 				INamedContainerProvider containerProvider = createContainerProvider(worldIn, pos);
-				ModNetworkChannels.CHANNEL.sendToServer(new RequestState(pos));
+				
+				ServerPlayerEntity spe = (ServerPlayerEntity) player;
+				NotifyPlayerTileEntity update = new NotifyPlayerTileEntity(entity.serializeNBT(), pos);
+				ModNetworkChannels.CHANNEL.sendTo(update, spe.connection.netManager, NetworkDirection.PLAY_TO_CLIENT);
+				
 				NetworkHooks.openGui((ServerPlayerEntity)player, containerProvider, entity.getPos());
 			}else{
 				throw new IllegalStateException("Incorrect tile entity!");

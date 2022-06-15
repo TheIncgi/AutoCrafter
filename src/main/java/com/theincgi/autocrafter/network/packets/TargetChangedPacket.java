@@ -49,7 +49,7 @@ public class TargetChangedPacket {
 			if( e != null ) {
 				if( e instanceof AutoCrafterTile ) {
 					AutoCrafterTile eTile = (AutoCrafterTile) e;
-					eTile.updateRecipes(message.targetItem, 0);
+					eTile.updateRecipes(message.targetItem, 0, worldIn);
 					NotifyPlayerTargetChangedPacket update = new NotifyPlayerTargetChangedPacket(message.targetItem, 0, blockPos);
 					ModNetworkChannels.CHANNEL.sendTo(update, player.connection.netManager, NetworkDirection.PLAY_TO_CLIENT);
 					//TODO broadcast?
